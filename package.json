@@ -7,7 +7,7 @@
     "start": "cross-env NODE_ENV=production ts-node index.js",
     "tsc": "tsc",
     "test": "cross-env NODE_ENV=test jest --watch",
-    "watch": "ts-node-dev index.ts",
+    "watch": "cross-env NODE_ENV=development ts-node-dev index.ts",
     "lint": "eslint . --ext .ts"
   },
   "author": "Jarmo Syvälahti",
@@ -29,7 +29,9 @@
     "cross-env": "^7.0.2",
     "eslint": "^7.0.0",
     "eslint-config-prettier": "^6.11.0",
+    "husky": "^4.2.5",
     "jest": "^26.0.1",
+    "lint-staged": "^10.2.2",
     "prettier": "2.0.5",
     "supertest": "^4.0.2",
     "ts-node": "^8.10.1",
@@ -46,5 +48,17 @@
     "mongoose": "^5.9.14",
     "mongoose-unique-validator": "^2.0.3",
     "morgan": "^1.10.0"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.ts": [
+      "eslint --fix",
+      "cross-env NODE_ENV=test jest --bail --passWithNoTests"
+    ],
+    "*.{ts,js,json,md}": "prettier --write"
   }
 }
