@@ -4,9 +4,13 @@
   "description": "tdd-demo-api",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "cross-env NODE_ENV=production ts-node index.js",
+    "tsc": "tsc",
+    "test": "cross-env NODE_ENV=test jest --watch",
+    "watch": "ts-node-dev index.ts",
+    "lint": "eslint . --ext .ts"
   },
-  "author": "",
+  "author": "Jarmo Syvälahti",
   "license": "ISC",
   "devDependencies": {
     "@types/bcrypt": "^3.0.0",
