@@ -4,7 +4,7 @@
   "description": "tdd-demo-api",
   "main": "index.js",
   "scripts": {
-    "start": "cross-env NODE_ENV=production ts-node index.js",
+    "start": "cross-env NODE_ENV=production ts-node --transpile-only index.ts ",
     "tsc": "tsc",
     "test": "cross-env NODE_ENV=test jest --watch",
     "watch": "cross-env NODE_ENV=development ts-node-dev index.ts",
