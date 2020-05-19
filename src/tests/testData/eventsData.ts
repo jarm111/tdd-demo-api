@@ -1,11 +1,11 @@
-type MyEvent = Readonly<{
+export type EventType = Readonly<{
   title: string
   date: string
   description: string
   category: string
 }>
 
-const events: ReadonlyArray<MyEvent> = [
+const events: ReadonlyArray<EventType> = [
   {
     title: 'My event one',
     date: '2020-05-18',
@@ -25,5 +25,12 @@ const events: ReadonlyArray<MyEvent> = [
     category: 'theatre',
   },
 ]
+
+export const newEvent: EventType = {
+  title: 'My event four',
+  date: '2020-05-21',
+  description: 'Welcome to my fun event four',
+  category: 'music',
+}
 
 export default events
