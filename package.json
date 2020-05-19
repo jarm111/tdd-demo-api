@@ -2,12 +2,12 @@
   "name": "tdd-demo-api",
   "version": "0.0.1",
   "description": "tdd-demo-api",
-  "main": "index.js",
+  "main": "src/index.ts",
   "scripts": {
-    "start": "cross-env NODE_ENV=production ts-node --transpile-only index.ts ",
+    "start": "cross-env NODE_ENV=production ts-node --transpile-only src/index.ts ",
     "tsc": "tsc",
     "test": "cross-env NODE_ENV=test jest --watch",
-    "watch": "cross-env NODE_ENV=development ts-node-dev index.ts",
+    "watch": "cross-env NODE_ENV=development ts-node-dev src/index.ts",
     "lint": "eslint . --ext .ts"
   },
   "author": "Jarmo Syvälahti",
