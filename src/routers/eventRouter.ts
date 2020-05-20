@@ -26,4 +26,15 @@ eventRouter.post('/', async (req, res) => {
   }
 })
 
+eventRouter.delete('/:id', async (req, res, next) => {
+  const id = req.params.id
+
+  try {
+    await Event.findByIdAndDelete(id)
+    res.status(204).end()
+  } catch (error) {
+    next(error)
+  }
+})
+
 export default eventRouter

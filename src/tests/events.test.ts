@@ -31,7 +31,7 @@ afterAll(async () => {
   await mongoServer.stop()
 })
 
-test('get initial events', async () => {
+test('get events', async () => {
   const res = await req(app)
     .get('/api/events')
     .expect(200)
@@ -39,7 +39,7 @@ test('get initial events', async () => {
   expect(res.body.length).toBe(events.length)
 })
 
-test('create new event', async () => {
+test('create event', async () => {
   await req(app)
     .post('/api/events')
     .send(newEvent)
@@ -53,7 +53,7 @@ test('create new event', async () => {
   expect(titles).toContain(newEvent.title)
 })
 
-test('handle invalid event creation', async () => {
+test('create invalid event', async () => {
   const { title, description } = newEvent
   const invalidEvent = { title, description }
 
@@ -62,4 +62,15 @@ test('handle invalid event creation', async () => {
   const eventsInDb = await getEventsInDb()
 
   expect(eventsInDb.length).toBe(events.length)
+})
+
+test('delete event', async () => {
+  const eventsInDb = await getEventsInDb()
+  const eventToDelete = eventsInDb[0]
+
+  await req(app).delete(`/api/events/${eventToDelete['_id']}`).expect(204)
+
+  const eventsInDbAfter = await getEventsInDb()
+
+  expect(eventsInDbAfter.length).toBe(events.length - 1)
 })
