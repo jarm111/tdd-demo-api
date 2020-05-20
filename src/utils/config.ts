@@ -13,6 +13,24 @@ const config = convict({
     env: 'PORT',
     arg: 'port',
   },
+  db: {
+    dev: {
+      doc: 'Development DB connection url',
+      format: String,
+      default: '',
+      env: 'MONGODB_URL_DEV',
+      arg: 'mongodb-url-dev',
+      sensitive: true,
+    },
+    prod: {
+      doc: 'Production DB connection url',
+      format: String,
+      default: '',
+      env: 'MONGODB_URL_PROD',
+      arg: 'mongodb-url-prod',
+      sensitive: true,
+    },
+  },
 })
 
 export default config
