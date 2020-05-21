@@ -76,3 +76,27 @@ test('delete event', async () => {
   expect(eventsInDbAfter.length).toBe(events.length - 1)
   expect(titles).not.toContain(eventToDelete.title)
 })
+
+test('update event', async () => {
+  const eventsInDb = await getEventsInDb()
+  const [{ title, date, category, _id }] = eventsInDb
+  const updatedDescription = 'Test to update description'
+
+  const updatedEvent = {
+    title,
+    date,
+    description: updatedDescription,
+    category,
+  }
+
+  await req(app)
+    .put(`/api/events/${_id}`)
+    .send(updatedEvent)
+    .expect(200)
+    .expect('Content-Type', /application\/json/)
+
+  const eventsInDbAfter = await getEventsInDb()
+  const descriptions = eventsInDbAfter.map((event) => event.description)
+
+  expect(descriptions).toContain(updatedDescription)
+})
