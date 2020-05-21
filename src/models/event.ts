@@ -1,22 +1,21 @@
-import mongoose from 'mongoose'
+import { createSchema, Type, typedModel } from 'ts-mongoose'
 
-const eventSchema = new mongoose.Schema({
-  title: {
-    type: String,
-    required: true,
-  },
-  date: {
-    type: Date,
-    required: true,
-  },
-  description: {
-    type: String,
-    required: true,
-  },
-  category: {
-    type: String,
-    required: true,
-  },
+const categories = [
+  'music',
+  'theatre',
+  'sports',
+  'lectures',
+  'dancing',
+  'exhibitions',
+  'culture',
+  'other',
+] as const
+
+const eventSchema = createSchema({
+  title: Type.string({ required: true }),
+  date: Type.date({ required: true }),
+  description: Type.string({ required: true }),
+  category: Type.string({ required: true, enum: categories }),
 })
 
-export default mongoose.model('Event', eventSchema)
+export default typedModel('Event', eventSchema)

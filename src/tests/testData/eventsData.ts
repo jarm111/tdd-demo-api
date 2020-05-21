@@ -1,4 +1,4 @@
-export type EventType = Readonly<{
+type EventType = Readonly<{
   title: string
   date: string
   description: string

@@ -3,7 +3,7 @@ import { MongoMemoryServer } from 'mongodb-memory-server'
 import req from 'supertest'
 import app from '../app'
 import Event from '../models/event'
-import events, { newEvent, EventType } from './testData/eventsData'
+import events, { newEvent } from './testData/eventsData'
 
 let mongoServer: MongoMemoryServer
 
@@ -46,10 +46,10 @@ test('create event', async () => {
     .expect(201)
     .expect('Content-Type', /application\/json/)
 
-  const eventsInDb: unknown = await getEventsInDb()
-  const titles = (eventsInDb as EventType[]).map((event) => event.title)
+  const eventsInDb = await getEventsInDb()
+  const titles = eventsInDb.map((event) => event.title)
 
-  expect((eventsInDb as EventType[]).length).toBe(events.length + 1)
+  expect(eventsInDb.length).toBe(events.length + 1)
   expect(titles).toContain(newEvent.title)
 })
 
@@ -66,11 +66,13 @@ test('create invalid event', async () => {
 
 test('delete event', async () => {
   const eventsInDb = await getEventsInDb()
-  const eventToDelete = eventsInDb[0]
+  const [eventToDelete] = eventsInDb
 
-  await req(app).delete(`/api/events/${eventToDelete['_id']}`).expect(204)
+  await req(app).delete(`/api/events/${eventToDelete._id}`).expect(204)
 
   const eventsInDbAfter = await getEventsInDb()
+  const titles = eventsInDbAfter.map((event) => event.title)
 
   expect(eventsInDbAfter.length).toBe(events.length - 1)
+  expect(titles).not.toContain(eventToDelete.title)
 })
