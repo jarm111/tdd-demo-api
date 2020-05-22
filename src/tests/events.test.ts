@@ -3,7 +3,7 @@ import { MongoMemoryServer } from 'mongodb-memory-server'
 import req from 'supertest'
 import app from '../app'
 import Event from '../models/event'
-import events, { newEvent } from './testData/eventsData'
+import events, { newEvent } from './testData/event.testData'
 
 let mongoServer: MongoMemoryServer
 
@@ -15,7 +15,12 @@ beforeAll(async () => {
   mongoServer = new MongoMemoryServer()
   const mongoUri = await mongoServer.getConnectionString()
   mongoose
-    .connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true })
+    .connect(mongoUri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      useCreateIndex: true,
+      useFindAndModify: false,
+    })
     .catch((e) => {
       console.error(e)
     })

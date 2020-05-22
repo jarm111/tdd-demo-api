@@ -11,7 +11,7 @@ const categories = [
   'other',
 ] as const
 
-const eventSchema = createSchema({
+export const eventSchema = createSchema({
   title: Type.string({ required: true }),
   date: Type.date({ required: true }),
   description: Type.string({ required: true }),
