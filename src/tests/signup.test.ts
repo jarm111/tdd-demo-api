@@ -1,5 +1,5 @@
-import mongoose from 'mongoose'
 import { MongoMemoryServer } from 'mongodb-memory-server'
+import { connect, closeConnection } from './testUtils/testDbConnection'
 import req from 'supertest'
 import app from '../app'
 import User from '../models/user'
@@ -12,27 +12,15 @@ const getUsersInDb = async () => {
 }
 
 beforeAll(async () => {
-  mongoServer = new MongoMemoryServer()
-  const mongoUri = await mongoServer.getConnectionString()
-  mongoose
-    .connect(mongoUri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      useCreateIndex: true,
-      useFindAndModify: false,
-    })
-    .catch((e) => {
-      console.error(e)
-    })
+  mongoServer = await connect()
+})
+
+afterAll(async () => {
+  await closeConnection(mongoServer)
 })
 
 beforeEach(async () => {
   await User.deleteMany({})
-})
-
-afterAll(async () => {
-  await mongoose.connection.close()
-  await mongoServer.stop()
 })
 
 test('successful sign up', async () => {

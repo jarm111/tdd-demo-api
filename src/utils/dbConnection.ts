@@ -1,5 +1,6 @@
 import mongoose from 'mongoose'
 import config from './config'
+import connectionOptions from './mongooseConnectionOptions'
 
 const connectToDb = () => {
   if (config.get('env') === 'test') {
@@ -12,10 +13,7 @@ const connectToDb = () => {
       : config.get('db.dev')
 
   mongoose
-    .connect(dbUrl, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    })
+    .connect(dbUrl, connectionOptions)
     .then(() => {
       console.log(`connected to ${config.get('env')} DB`)
     })

@@ -1,5 +1,5 @@
-import mongoose from 'mongoose'
 import { MongoMemoryServer } from 'mongodb-memory-server'
+import { connect, closeConnection } from './testUtils/testDbConnection'
 import req from 'supertest'
 import app from '../app'
 import Event from '../models/event'
@@ -12,28 +12,16 @@ const getEventsInDb = async () => {
 }
 
 beforeAll(async () => {
-  mongoServer = new MongoMemoryServer()
-  const mongoUri = await mongoServer.getConnectionString()
-  mongoose
-    .connect(mongoUri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      useCreateIndex: true,
-      useFindAndModify: false,
-    })
-    .catch((e) => {
-      console.error(e)
-    })
+  mongoServer = await connect()
+})
+
+afterAll(async () => {
+  await closeConnection(mongoServer)
 })
 
 beforeEach(async () => {
   await Event.deleteMany({})
   await Event.insertMany(events)
-})
-
-afterAll(async () => {
-  await mongoose.connection.close()
-  await mongoServer.stop()
 })
 
 test('get events', async () => {
