@@ -1,22 +1,21 @@
-import { MongoMemoryServer } from 'mongodb-memory-server'
-import { connect, closeConnection } from './testUtils/testDbConnection'
+import TestDbConnection from './testUtils/TestDbConnection'
 import req from 'supertest'
 import app from '../app'
 import User from '../models/user'
 import { newUser } from './testData/user.testData'
 
-let mongoServer: MongoMemoryServer
+const dbConnection = new TestDbConnection()
 
 const getUsersInDb = async () => {
   return await User.find({})
 }
 
 beforeAll(async () => {
-  mongoServer = await connect()
+  await dbConnection.connect()
 })
 
 afterAll(async () => {
-  await closeConnection(mongoServer)
+  await dbConnection.disconnect()
 })
 
 beforeEach(async () => {
