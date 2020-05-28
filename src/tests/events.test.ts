@@ -105,3 +105,15 @@ test('handle event not found', async () => {
     .expect(404)
     .expect('Content-Type', /application\/json/)
 })
+
+test('handle malformed id', async () => {
+  const eventsInDb = await getEventsInDb()
+  const [event] = eventsInDb
+  const badId = 'This is bad id'
+
+  await req(app)
+    .put(`/api/events/${badId}`)
+    .send(event)
+    .expect(400)
+    .expect('Content-Type', /application\/json/)
+})

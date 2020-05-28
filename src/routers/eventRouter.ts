@@ -54,7 +54,7 @@ eventRouter.put('/:id', async (req, res, next) => {
       runValidators: true,
     })
     if (!result) {
-      throw new Error('Not found')
+      throw new Error('Document not found')
     }
     res.status(200).json(result)
   } catch (error) {
