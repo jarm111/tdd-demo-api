@@ -45,7 +45,7 @@ test('create event', async () => {
   expect(titles).toContain(newEvent.title)
 })
 
-test('create invalid event', async () => {
+test('handle event validation', async () => {
   const { title, description } = newEvent
   const invalidEvent = { title, description }
 

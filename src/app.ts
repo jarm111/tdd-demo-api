@@ -4,6 +4,7 @@ import connectToDb from './utils/dbConnection'
 import useLogger from './utils/requestLogger'
 import eventRouter from './routers/eventRouter'
 import signupRouter from './routers/signupRouter'
+import errorHandler from './middleware/errorHandler'
 
 const app = express()
 app.use(express.json())
@@ -18,5 +19,7 @@ app.use('/api/signup', signupRouter)
 app.get('/', (_, res) => {
   res.send('Welcome to Events Board App API')
 })
+
+app.use(errorHandler)
 
 export default app

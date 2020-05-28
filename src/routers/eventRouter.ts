@@ -8,7 +8,7 @@ eventRouter.get('/', async (_, res) => {
   res.status(200).json(events)
 })
 
-eventRouter.post('/', async (req, res) => {
+eventRouter.post('/', async (req, res, next) => {
   const { title, date, description, category } = req.body
 
   try {
@@ -22,7 +22,7 @@ eventRouter.post('/', async (req, res) => {
     const savedEvent = await event.save()
     res.status(201).json(savedEvent)
   } catch (e) {
-    res.status(400).send({ error: e.message })
+    next(e)
   }
 })
 
