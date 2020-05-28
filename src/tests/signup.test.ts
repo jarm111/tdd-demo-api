@@ -51,6 +51,20 @@ test('email format validation', async () => {
   expect(emails).not.toContain(newUser.email)
 })
 
+test('unique email validation', async () => {
+  const user = new User({
+    email: newUser.email,
+    passwordHash: 'hash',
+  })
+  await user.save()
+
+  await req(app)
+    .post('/api/signup')
+    .send(newUser)
+    .expect(400)
+    .expect('Content-Type', /application\/json/)
+})
+
 test('password validation', async () => {
   const contentWithBadPassword = { email: newUser.email, password: 'short' }
 
