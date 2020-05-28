@@ -37,7 +37,7 @@ test('successful sign up', async () => {
   expect(res.body.token).toBeDefined()
 })
 
-test('email validation', async () => {
+test('email format validation', async () => {
   const contentWithBadEmail = {
     email: 'incorrect.mail.com',
     password: newUser.password,

@@ -11,16 +11,18 @@ const validatePassword = (password: string) => {
   return password.length >= passwordMinLength
 }
 
-signupRouter.post('/', async (req, res) => {
+signupRouter.post('/', async (req, res, next) => {
   const { email, password } = req.body
 
   const passwordHash = await bcrypt.hash(password, config.get('salt'))
 
   try {
     if (!validatePassword(password)) {
-      throw new Error(
+      const err = new Error(
         `Password too short, must be min ${passwordMinLength} characters`
       )
+      err.name = 'ValidationError'
+      throw err
     }
 
     const user = new User({
@@ -42,7 +44,7 @@ signupRouter.post('/', async (req, res) => {
       email: savedUser.email,
     })
   } catch (e) {
-    res.status(400).send({ error: e.message })
+    next(e)
   }
 })
 
