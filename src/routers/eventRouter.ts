@@ -51,7 +51,11 @@ eventRouter.put('/:id', async (req, res, next) => {
   try {
     const result = await Event.findByIdAndUpdate(id, updatedEvent, {
       new: true,
+      runValidators: true,
     })
+    if (!result) {
+      throw new Error('Not found')
+    }
     res.status(200).json(result)
   } catch (error) {
     next(error)

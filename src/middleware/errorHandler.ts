@@ -9,6 +9,10 @@ const errorHandler: ErrorRequestHandler = (err, _, res, next) => {
     return res.status(400).send(message)
   }
 
+  if (err.message === 'Not found') {
+    return res.status(404).send(message)
+  }
+
   return next()
 }
 

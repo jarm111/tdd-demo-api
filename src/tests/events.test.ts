@@ -92,3 +92,16 @@ test('update event', async () => {
 
   expect(descriptions).toContain(updatedDescription)
 })
+
+test('handle event not found', async () => {
+  const eventsInDb = await getEventsInDb()
+  const [event] = eventsInDb
+
+  await Event.deleteMany({})
+
+  await req(app)
+    .put(`/api/events/${event._id}`)
+    .send(event)
+    .expect(404)
+    .expect('Content-Type', /application\/json/)
+})
