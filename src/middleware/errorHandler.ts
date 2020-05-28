@@ -5,16 +5,20 @@ const errorHandler: ErrorRequestHandler = (err, _, res, next) => {
     error: err.message,
   }
 
+  const respond = (status: number): void => {
+    res.status(status).send(message)
+  }
+
   if (err.name === 'ValidationError') {
-    return res.status(400).send(message)
+    return respond(400)
   }
 
   if (err.name === 'CastError') {
-    return res.status(400).send(message)
+    return respond(400)
   }
 
   if (err.message === 'Document not found') {
-    return res.status(404).send(message)
+    return respond(404)
   }
 
   return next()
