@@ -17,6 +17,10 @@ const errorHandler: ErrorRequestHandler = (err, _, res, next) => {
     return respond(400)
   }
 
+  if (err.name === 'AuthenticationError') {
+    return respond(401)
+  }
+
   if (err.message === 'Document not found') {
     return respond(404)
   }

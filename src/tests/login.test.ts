@@ -55,3 +55,16 @@ test('successful login', async () => {
   expect(res.body.id).toEqual(userInDb._id.toString())
   expect(res.body.token).toBeDefined()
 })
+
+test('no user with given email', async () => {
+  const user = {
+    email: 'no.such@email.com',
+    password: 'foobar123',
+  }
+
+  await req(app)
+    .post('/api/login')
+    .send(user)
+    .expect(401)
+    .expect('Content-Type', /application\/json/)
+})
