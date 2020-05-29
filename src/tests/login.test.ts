@@ -68,3 +68,18 @@ test('no user with given email', async () => {
     .expect(401)
     .expect('Content-Type', /application\/json/)
 })
+
+test('wrong password', async () => {
+  const [{ email }] = users
+
+  const user = {
+    email: email,
+    password: 'foobar123',
+  }
+
+  await req(app)
+    .post('/api/login')
+    .send(user)
+    .expect(401)
+    .expect('Content-Type', /application\/json/)
+})
