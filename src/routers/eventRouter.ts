@@ -9,9 +9,16 @@ eventRouter.get('/', async (_, res) => {
 })
 
 eventRouter.post('/', async (req, res, next) => {
+  const authHeader = req.get('authorization')
   const { title, date, description, category } = req.body
 
   try {
+    if (!(authHeader && authHeader.toLowerCase().startsWith('bearer '))) {
+      const err = new Error(`Authentication token missing or invalid`)
+      err.name = 'AuthenticationError'
+      throw err
+    }
+
     const event = new Event({
       title,
       description,
