@@ -21,13 +21,7 @@ eventRouter.post('/', async (req, res, next) => {
   const { title, date, description, category } = req.body
 
   try {
-    if (!(authHeader && authHeader.toLowerCase().startsWith('bearer '))) {
-      const err = new Error(`Authentication token missing or invalid`)
-      err.name = 'AuthenticationError'
-      throw err
-    }
-
-    const token = authHeader.substring(7)
+    const token = authHeader ? authHeader.substring(7) : ''
     const decodedPayload = jwt.verify(token, config.get('secret')) as Payload
 
     const user = await User.findById(decodedPayload.id)
