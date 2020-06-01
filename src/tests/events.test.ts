@@ -62,7 +62,7 @@ test('create event', async () => {
   expect(titles).toContain(newEvent.title)
 })
 
-test('handle event validation', async () => {
+test('create event validation', async () => {
   const token = await createToken()
   const { title, description } = newEvent
   const invalidEvent = { title, description }
@@ -78,7 +78,7 @@ test('handle event validation', async () => {
   expect(eventsInDb.length).toBe(events.length)
 })
 
-test('handle missing token on create event', async () => {
+test('missing token on create event', async () => {
   await req(app)
     .post('/api/events')
     .send(newEvent)
@@ -86,7 +86,7 @@ test('handle missing token on create event', async () => {
     .expect('Content-Type', /application\/json/)
 })
 
-test('handle unauthorized create event', async () => {
+test('unauthorized create event', async () => {
   const badToken = 'badToken'
   await req(app)
     .post('/api/events')
@@ -133,7 +133,7 @@ test('update event', async () => {
   expect(descriptions).toContain(updatedDescription)
 })
 
-test('handle event not found', async () => {
+test('update missing event', async () => {
   const eventsInDb = await getEventsInDb()
   const [event] = eventsInDb
 
@@ -146,7 +146,7 @@ test('handle event not found', async () => {
     .expect('Content-Type', /application\/json/)
 })
 
-test('handle malformed id', async () => {
+test('update event with bad id', async () => {
   const eventsInDb = await getEventsInDb()
   const [event] = eventsInDb
   const badId = 'This is bad id'
