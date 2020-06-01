@@ -1,13 +1,26 @@
 import TestDbConnection from './testUtils/TestDbConnection'
 import req from 'supertest'
+import jwt from 'jsonwebtoken'
 import app from '../app'
 import Event from '../models/event'
+import User from '../models/user'
 import events, { newEvent } from './testData/event.testData'
+import { newUser } from './testData/user.testData'
+import config from '../utils/config'
 
 const dbConnection = new TestDbConnection()
 
 const getEventsInDb = async () => {
   return await Event.find({})
+}
+
+const createToken = async () => {
+  const user = await User.findOne({ email: newUser.email })
+  const payload = {
+    id: user?._id,
+    email: user?.email,
+  }
+  return jwt.sign(payload, config.get('secret'))
 }
 
 beforeAll(async () => {
@@ -20,7 +33,9 @@ afterAll(async () => {
 
 beforeEach(async () => {
   await Event.deleteMany({})
+  await User.deleteMany({})
   await Event.insertMany(events)
+  await User.insertMany({ email: newUser.email, passwordHash: 'hash' })
 })
 
 test('get events', async () => {
@@ -32,9 +47,10 @@ test('get events', async () => {
 })
 
 test('create event', async () => {
+  const token = await createToken()
   await req(app)
     .post('/api/events')
-    .set({ Authorization: 'bearer token' })
+    .set({ Authorization: `bearer ${token}` })
     .send(newEvent)
     .expect(201)
     .expect('Content-Type', /application\/json/)
@@ -46,7 +62,23 @@ test('create event', async () => {
   expect(titles).toContain(newEvent.title)
 })
 
-test('handle unauthorized create event', async () => {
+test('handle event validation', async () => {
+  const token = await createToken()
+  const { title, description } = newEvent
+  const invalidEvent = { title, description }
+
+  await req(app)
+    .post('/api/events')
+    .set({ Authorization: `bearer ${token}` })
+    .send(invalidEvent)
+    .expect(400)
+
+  const eventsInDb = await getEventsInDb()
+
+  expect(eventsInDb.length).toBe(events.length)
+})
+
+test('handle missing token on create event', async () => {
   await req(app)
     .post('/api/events')
     .send(newEvent)
@@ -54,19 +86,14 @@ test('handle unauthorized create event', async () => {
     .expect('Content-Type', /application\/json/)
 })
 
-test('handle event validation', async () => {
-  const { title, description } = newEvent
-  const invalidEvent = { title, description }
-
+test('handle unauthorized create event', async () => {
+  const badToken = 'badToken'
   await req(app)
     .post('/api/events')
-    .set({ Authorization: 'bearer token' })
-    .send(invalidEvent)
-    .expect(400)
-
-  const eventsInDb = await getEventsInDb()
-
-  expect(eventsInDb.length).toBe(events.length)
+    .set({ Authorization: `bearer ${badToken}` })
+    .send(newEvent)
+    .expect(401)
+    .expect('Content-Type', /application\/json/)
 })
 
 test('delete event', async () => {

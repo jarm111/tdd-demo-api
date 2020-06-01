@@ -1,23 +1,17 @@
 import { ErrorRequestHandler } from 'express'
 
 const errorHandler: ErrorRequestHandler = (err, _, res, next) => {
-  const message = {
-    error: err.message,
-  }
-
   const respond = (status: number): void => {
-    res.status(status).send(message)
+    res.status(status).json({
+      error: err.message,
+    })
   }
 
-  if (err.name === 'ValidationError') {
+  if (err.name === 'ValidationError' || err.name === 'CastError') {
     return respond(400)
   }
 
-  if (err.name === 'CastError') {
-    return respond(400)
-  }
-
-  if (err.name === 'AuthenticationError') {
+  if (err.name === 'AuthenticationError' || err.name === 'JsonWebTokenError') {
     return respond(401)
   }
 

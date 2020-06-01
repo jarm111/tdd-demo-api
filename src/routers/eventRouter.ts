@@ -1,5 +1,13 @@
 import { Router } from 'express'
+import jwt from 'jsonwebtoken'
 import Event from '../models/event'
+import User from '../models/user'
+import config from '../utils/config'
+
+type Payload = {
+  id: string
+  email: string
+}
 
 const eventRouter = Router()
 
@@ -15,6 +23,17 @@ eventRouter.post('/', async (req, res, next) => {
   try {
     if (!(authHeader && authHeader.toLowerCase().startsWith('bearer '))) {
       const err = new Error(`Authentication token missing or invalid`)
+      err.name = 'AuthenticationError'
+      throw err
+    }
+
+    const token = authHeader.substring(7)
+    const decodedPayload = jwt.verify(token, config.get('secret')) as Payload
+
+    const user = await User.findById(decodedPayload.id)
+
+    if (!user) {
+      const err = new Error(`User provided in token does not exist`)
       err.name = 'AuthenticationError'
       throw err
     }

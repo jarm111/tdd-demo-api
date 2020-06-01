@@ -18,4 +18,6 @@ export const eventSchema = createSchema({
   category: Type.string({ required: true, enum: categories }),
 })
 
-export default typedModel('Event', eventSchema)
+const Event = typedModel('Event', eventSchema)
+
+export default Event
