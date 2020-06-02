@@ -1,4 +1,4 @@
-import { createSchema, Type, typedModel } from 'ts-mongoose'
+import { createSchema, Type, typedModel, ExtractProps } from 'ts-mongoose'
 import 'ts-mongoose/plugin'
 import uniqueValidator from 'mongoose-unique-validator'
 import { eventSchema } from './event'
@@ -6,7 +6,7 @@ import { eventSchema } from './event'
 const emailRegex = /^([\w-.]+@([\w-]+\.)+[\w-]{2,4})?$/
 const validateEmail = (email: string) => emailRegex.test(email)
 
-const userSchema = createSchema({
+export const userSchema = createSchema({
   email: Type.string({
     required: true,
     unique: true,
@@ -21,6 +21,8 @@ const userSchema = createSchema({
     Type.ref(Type.objectId()).to('Event', eventSchema)
   ),
 })
+
+export type UserProps = ExtractProps<typeof userSchema>
 
 userSchema.plugin(uniqueValidator)
 

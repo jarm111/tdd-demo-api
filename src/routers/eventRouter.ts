@@ -40,6 +40,8 @@ eventRouter.post('/', async (req, res, next) => {
     })
 
     const savedEvent = await event.save()
+    user.ownEvents = user.ownEvents?.concat(savedEvent.id)
+    await user.save()
     res.status(201).json(savedEvent)
   } catch (e) {
     next(e)

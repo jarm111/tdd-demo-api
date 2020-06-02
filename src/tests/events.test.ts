@@ -53,18 +53,20 @@ test('get events', async () => {
 test('create event', async () => {
   const [userInDb] = await getUsersInDb()
   const token = createToken(userInDb)
-  await req(app)
+  const res = await req(app)
     .post('/api/events')
     .set({ Authorization: `bearer ${token}` })
     .send(newEvent)
     .expect(201)
     .expect('Content-Type', /application\/json/)
 
-  const eventsInDb = await getEventsInDb()
-  const titles = eventsInDb.map((event) => event.title)
+  const [userInDbAfter] = await getUsersInDb()
+  const eventsInDbAfter = await getEventsInDb()
+  const titles = eventsInDbAfter.map((event) => event.title)
 
-  expect(eventsInDb.length).toBe(events.length + 1)
+  expect(eventsInDbAfter.length).toBe(events.length + 1)
   expect(titles).toContain(newEvent.title)
+  expect(userInDbAfter.ownEvents?.toString()).toContain(res.body._id)
 })
 
 test('create event validation', async () => {
