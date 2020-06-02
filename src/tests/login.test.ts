@@ -1,31 +1,14 @@
-import bcrypt from 'bcrypt'
 import TestDbConnection from './testUtils/TestDbConnection'
 import req from 'supertest'
 import app from '../app'
 import User from '../models/user'
 import users from './testData/user.testData'
-import config from '../utils/config'
+import hashPasswords from './testUtils/hashPasswords'
 
 const dbConnection = new TestDbConnection()
 
 const getUsersInDb = async () => {
   return await User.find({})
-}
-
-const initUsers = async () => {
-  const hashedUsers = await Promise.all(
-    users.map(async (user) => {
-      const hashedPassword = await bcrypt.hash(
-        user.password,
-        config.get('salt')
-      )
-      return {
-        email: user.email,
-        passwordHash: hashedPassword,
-      }
-    })
-  )
-  return hashedUsers
 }
 
 beforeAll(async () => {
@@ -38,7 +21,7 @@ afterAll(async () => {
 
 beforeEach(async () => {
   await User.deleteMany({})
-  await User.insertMany(await initUsers())
+  await User.insertMany(await hashPasswords(users))
 })
 
 test('successful login', async () => {

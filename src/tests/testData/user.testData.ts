@@ -1,4 +1,4 @@
-type User = Readonly<{
+export type User = Readonly<{
   email: string
   password: string
 }>

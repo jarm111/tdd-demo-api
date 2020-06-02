@@ -5,8 +5,9 @@ import app from '../app'
 import Event from '../models/event'
 import User from '../models/user'
 import events, { newEvent } from './testData/event.testData'
-import { newUser } from './testData/user.testData'
+import users from './testData/user.testData'
 import config from '../utils/config'
+import hashPasswords from './testUtils/hashPasswords'
 
 const dbConnection = new TestDbConnection()
 
@@ -15,7 +16,8 @@ const getEventsInDb = async () => {
 }
 
 const createToken = async () => {
-  const user = await User.findOne({ email: newUser.email })
+  const [{ email }] = users
+  const user = await User.findOne({ email })
   const payload = {
     id: user?._id,
     email: user?.email,
@@ -35,7 +37,7 @@ beforeEach(async () => {
   await Event.deleteMany({})
   await User.deleteMany({})
   await Event.insertMany(events)
-  await User.insertMany({ email: newUser.email, passwordHash: 'hash' })
+  await User.insertMany(await hashPasswords(users))
 })
 
 test('get events', async () => {
