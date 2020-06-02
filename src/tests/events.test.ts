@@ -3,7 +3,7 @@ import req from 'supertest'
 import jwt from 'jsonwebtoken'
 import app from '../app'
 import Event from '../models/event'
-import User from '../models/user'
+import User, { UserProps } from '../models/user'
 import events, { newEvent } from './testData/event.testData'
 import users from './testData/user.testData'
 import config from '../utils/config'
@@ -15,12 +15,14 @@ const getEventsInDb = async () => {
   return await Event.find({})
 }
 
-const createToken = async () => {
-  const [{ email }] = users
-  const user = await User.findOne({ email })
+const getUsersInDb = async () => {
+  return await User.find({})
+}
+
+const createToken = (user: UserProps) => {
   const payload = {
-    id: user?._id,
-    email: user?.email,
+    id: user._id,
+    email: user.email,
   }
   return jwt.sign(payload, config.get('secret'))
 }
@@ -49,7 +51,8 @@ test('get events', async () => {
 })
 
 test('create event', async () => {
-  const token = await createToken()
+  const [userInDb] = await getUsersInDb()
+  const token = createToken(userInDb)
   await req(app)
     .post('/api/events')
     .set({ Authorization: `bearer ${token}` })
@@ -65,7 +68,8 @@ test('create event', async () => {
 })
 
 test('create event validation', async () => {
-  const token = await createToken()
+  const [userInDb] = await getUsersInDb()
+  const token = createToken(userInDb)
   const { title, description } = newEvent
   const invalidEvent = { title, description }
 
