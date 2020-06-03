@@ -136,6 +136,33 @@ test('unauthorized delete event', async () => {
 })
 
 test('update event', async () => {
+  const [userInDb] = await getUsersInDb()
+  const token = createToken(userInDb)
+  const eventsInDb = await getEventsInDb()
+  const [{ title, date, category, _id }] = eventsInDb
+  const updatedDescription = 'Test to update description'
+
+  const updatedEvent = {
+    title,
+    date,
+    description: updatedDescription,
+    category,
+  }
+
+  await req(app)
+    .put(`/api/events/${_id}`)
+    .set({ Authorization: `bearer ${token}` })
+    .send(updatedEvent)
+    .expect(200)
+    .expect('Content-Type', /application\/json/)
+
+  const eventsInDbAfter = await getEventsInDb()
+  const descriptions = eventsInDbAfter.map((event) => event.description)
+
+  expect(descriptions).toContain(updatedDescription)
+})
+
+test('unauthorized update event', async () => {
   const eventsInDb = await getEventsInDb()
   const [{ title, date, category, _id }] = eventsInDb
   const updatedDescription = 'Test to update description'
@@ -150,16 +177,13 @@ test('update event', async () => {
   await req(app)
     .put(`/api/events/${_id}`)
     .send(updatedEvent)
-    .expect(200)
+    .expect(401)
     .expect('Content-Type', /application\/json/)
-
-  const eventsInDbAfter = await getEventsInDb()
-  const descriptions = eventsInDbAfter.map((event) => event.description)
-
-  expect(descriptions).toContain(updatedDescription)
 })
 
 test('update missing event', async () => {
+  const [userInDb] = await getUsersInDb()
+  const token = createToken(userInDb)
   const eventsInDb = await getEventsInDb()
   const [event] = eventsInDb
 
@@ -167,18 +191,22 @@ test('update missing event', async () => {
 
   await req(app)
     .put(`/api/events/${event._id}`)
+    .set({ Authorization: `bearer ${token}` })
     .send(event)
     .expect(404)
     .expect('Content-Type', /application\/json/)
 })
 
 test('update event with bad id', async () => {
+  const [userInDb] = await getUsersInDb()
+  const token = createToken(userInDb)
   const eventsInDb = await getEventsInDb()
   const [event] = eventsInDb
   const badId = 'This is bad id'
 
   await req(app)
     .put(`/api/events/${badId}`)
+    .set({ Authorization: `bearer ${token}` })
     .send(event)
     .expect(400)
     .expect('Content-Type', /application\/json/)

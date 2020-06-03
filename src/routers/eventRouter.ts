@@ -78,6 +78,7 @@ eventRouter.delete('/:id', async (req, res, next) => {
 })
 
 eventRouter.put('/:id', async (req, res, next) => {
+  const authHeader = req.get('authorization')
   const id = req.params.id
   const { title, description, date, category } = req.body
 
@@ -89,6 +90,17 @@ eventRouter.put('/:id', async (req, res, next) => {
   }
 
   try {
+    const token = authHeader ? authHeader.substring(7) : ''
+    const decodedPayload = jwt.verify(token, config.get('secret')) as Payload
+
+    const user = await User.findById(decodedPayload.id)
+
+    if (!user) {
+      const err = new Error(`User provided in token does not exist`)
+      err.name = 'AuthenticationError'
+      throw err
+    }
+
     const result = await Event.findByIdAndUpdate(id, updatedEvent, {
       new: true,
       runValidators: true,
