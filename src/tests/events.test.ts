@@ -129,10 +129,15 @@ test('delete event', async () => {
 })
 
 test('unauthorized delete event', async () => {
+  const [, userInDbWithNoRights] = await getUsersInDb()
+  const token = createToken(userInDbWithNoRights)
   const eventsInDb = await getEventsInDb()
   const [eventToDelete] = eventsInDb
 
-  await req(app).delete(`/api/events/${eventToDelete._id}`).expect(401)
+  await req(app)
+    .delete(`/api/events/${eventToDelete._id}`)
+    .set({ Authorization: `bearer ${token}` })
+    .expect(401)
 })
 
 test('update event', async () => {
@@ -163,6 +168,8 @@ test('update event', async () => {
 })
 
 test('unauthorized update event', async () => {
+  const [, userInDbWithNoRights] = await getUsersInDb()
+  const token = createToken(userInDbWithNoRights)
   const eventsInDb = await getEventsInDb()
   const [{ title, date, category, _id }] = eventsInDb
   const updatedDescription = 'Test to update description'
@@ -176,6 +183,7 @@ test('unauthorized update event', async () => {
 
   await req(app)
     .put(`/api/events/${_id}`)
+    .set({ Authorization: `bearer ${token}` })
     .send(updatedEvent)
     .expect(401)
     .expect('Content-Type', /application\/json/)
@@ -194,20 +202,5 @@ test('update missing event', async () => {
     .set({ Authorization: `bearer ${token}` })
     .send(event)
     .expect(404)
-    .expect('Content-Type', /application\/json/)
-})
-
-test('update event with bad id', async () => {
-  const [userInDb] = await getUsersInDb()
-  const token = createToken(userInDb)
-  const eventsInDb = await getEventsInDb()
-  const [event] = eventsInDb
-  const badId = 'This is bad id'
-
-  await req(app)
-    .put(`/api/events/${badId}`)
-    .set({ Authorization: `bearer ${token}` })
-    .send(event)
-    .expect(400)
     .expect('Content-Type', /application\/json/)
 })

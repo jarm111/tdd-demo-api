@@ -64,11 +64,19 @@ eventRouter.delete('/:id', async (req, res, next) => {
       throw err
     }
 
+    if (!(user.ownEvents && user.ownEvents.toString().includes(id))) {
+      const err = new Error(
+        `User has no rights to modify event or event with given id does not exist`
+      )
+      err.name = 'AuthenticationError'
+      throw err
+    }
+
     await Event.findByIdAndDelete(id)
     if (user.ownEvents) {
-      user.ownEvents =
-        user.ownEvents &&
-        user.ownEvents.filter((eventId) => eventId.toString() !== id)
+      user.ownEvents = user.ownEvents.filter(
+        (eventId) => eventId.toString() !== id
+      )
       await user.save()
     }
     res.status(204).end()
@@ -97,6 +105,14 @@ eventRouter.put('/:id', async (req, res, next) => {
 
     if (!user) {
       const err = new Error(`User provided in token does not exist`)
+      err.name = 'AuthenticationError'
+      throw err
+    }
+
+    if (!(user.ownEvents && user.ownEvents.toString().includes(id))) {
+      const err = new Error(
+        `User has no rights to modify event or event with given id does not exist`
+      )
       err.name = 'AuthenticationError'
       throw err
     }
