@@ -1,4 +1,4 @@
-import { Router } from 'express'
+import { Router, Request } from 'express'
 import jwt from 'jsonwebtoken'
 import Event from '../models/event'
 import User from '../models/user'
@@ -11,26 +11,32 @@ type Payload = {
 
 const eventRouter = Router()
 
+const checkAuth = async (req: Request) => {
+  const authHeader = req.get('authorization')
+  const token = authHeader ? authHeader.substring(7) : ''
+  const decodedPayload = jwt.verify(token, config.get('secret')) as Payload
+
+  const user = await User.findById(decodedPayload.id)
+
+  if (!user) {
+    const err = new Error(`User provided in token does not exist`)
+    err.name = 'AuthenticationError'
+    throw err
+  }
+
+  return user
+}
+
 eventRouter.get('/', async (_, res) => {
   const events = await Event.find()
   res.status(200).json(events)
 })
 
 eventRouter.post('/', async (req, res, next) => {
-  const authHeader = req.get('authorization')
   const { title, date, description, category } = req.body
 
   try {
-    const token = authHeader ? authHeader.substring(7) : ''
-    const decodedPayload = jwt.verify(token, config.get('secret')) as Payload
-
-    const user = await User.findById(decodedPayload.id)
-
-    if (!user) {
-      const err = new Error(`User provided in token does not exist`)
-      err.name = 'AuthenticationError'
-      throw err
-    }
+    const user = await checkAuth(req)
 
     const event = new Event({
       title,
@@ -49,20 +55,10 @@ eventRouter.post('/', async (req, res, next) => {
 })
 
 eventRouter.delete('/:id', async (req, res, next) => {
-  const authHeader = req.get('authorization')
   const id = req.params.id
 
   try {
-    const token = authHeader ? authHeader.substring(7) : ''
-    const decodedPayload = jwt.verify(token, config.get('secret')) as Payload
-
-    const user = await User.findById(decodedPayload.id)
-
-    if (!user) {
-      const err = new Error(`User provided in token does not exist`)
-      err.name = 'AuthenticationError'
-      throw err
-    }
+    const user = await checkAuth(req)
 
     if (!(user.ownEvents && user.ownEvents.toString().includes(id))) {
       const err = new Error(
@@ -73,12 +69,12 @@ eventRouter.delete('/:id', async (req, res, next) => {
     }
 
     await Event.findByIdAndDelete(id)
-    if (user.ownEvents) {
-      user.ownEvents = user.ownEvents.filter(
-        (eventId) => eventId.toString() !== id
-      )
-      await user.save()
-    }
+
+    user.ownEvents = user.ownEvents.filter(
+      (eventId) => eventId.toString() !== id
+    )
+    await user.save()
+
     res.status(204).end()
   } catch (error) {
     next(error)
@@ -86,7 +82,6 @@ eventRouter.delete('/:id', async (req, res, next) => {
 })
 
 eventRouter.put('/:id', async (req, res, next) => {
-  const authHeader = req.get('authorization')
   const id = req.params.id
   const { title, description, date, category } = req.body
 
@@ -98,16 +93,7 @@ eventRouter.put('/:id', async (req, res, next) => {
   }
 
   try {
-    const token = authHeader ? authHeader.substring(7) : ''
-    const decodedPayload = jwt.verify(token, config.get('secret')) as Payload
-
-    const user = await User.findById(decodedPayload.id)
-
-    if (!user) {
-      const err = new Error(`User provided in token does not exist`)
-      err.name = 'AuthenticationError'
-      throw err
-    }
+    const user = await checkAuth(req)
 
     if (!(user.ownEvents && user.ownEvents.toString().includes(id))) {
       const err = new Error(
