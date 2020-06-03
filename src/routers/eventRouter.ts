@@ -49,10 +49,28 @@ eventRouter.post('/', async (req, res, next) => {
 })
 
 eventRouter.delete('/:id', async (req, res, next) => {
+  const authHeader = req.get('authorization')
   const id = req.params.id
 
   try {
+    const token = authHeader ? authHeader.substring(7) : ''
+    const decodedPayload = jwt.verify(token, config.get('secret')) as Payload
+
+    const user = await User.findById(decodedPayload.id)
+
+    if (!user) {
+      const err = new Error(`User provided in token does not exist`)
+      err.name = 'AuthenticationError'
+      throw err
+    }
+
     await Event.findByIdAndDelete(id)
+    if (user.ownEvents) {
+      user.ownEvents =
+        user.ownEvents &&
+        user.ownEvents.filter((eventId) => eventId.toString() !== id)
+      await user.save()
+    }
     res.status(204).end()
   } catch (error) {
     next(error)

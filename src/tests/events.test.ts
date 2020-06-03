@@ -40,6 +40,11 @@ beforeEach(async () => {
   await User.deleteMany({})
   await Event.insertMany(events)
   await User.insertMany(await hashPasswords(users))
+  const eventsInDb = await getEventsInDb()
+  const [user] = await getUsersInDb()
+  const eventIds = eventsInDb.map((event) => event.id)
+  user.ownEvents = user.ownEvents?.concat(eventIds)
+  await user.save()
 })
 
 test('get events', async () => {
@@ -105,16 +110,29 @@ test('unauthorized create event', async () => {
 })
 
 test('delete event', async () => {
-  const eventsInDb = await getEventsInDb()
-  const [eventToDelete] = eventsInDb
+  const [userInDb] = await getUsersInDb()
+  const token = createToken(userInDb)
+  const [eventToDelete] = await getEventsInDb()
 
-  await req(app).delete(`/api/events/${eventToDelete._id}`).expect(204)
+  await req(app)
+    .delete(`/api/events/${eventToDelete._id}`)
+    .set({ Authorization: `bearer ${token}` })
+    .expect(204)
 
   const eventsInDbAfter = await getEventsInDb()
   const titles = eventsInDbAfter.map((event) => event.title)
+  const [userInDbAfter] = await getUsersInDb()
 
   expect(eventsInDbAfter.length).toBe(events.length - 1)
   expect(titles).not.toContain(eventToDelete.title)
+  expect(userInDbAfter.ownEvents?.toString()).not.toContain(eventToDelete.id)
+})
+
+test('unauthorized delete event', async () => {
+  const eventsInDb = await getEventsInDb()
+  const [eventToDelete] = eventsInDb
+
+  await req(app).delete(`/api/events/${eventToDelete._id}`).expect(401)
 })
 
 test('update event', async () => {
