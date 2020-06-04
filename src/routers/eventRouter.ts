@@ -1,17 +1,17 @@
 import { Router, Request } from 'express'
 import jwt from 'jsonwebtoken'
 import Event from '../models/event'
-import User from '../models/user'
+import User, { UserProps } from '../models/user'
 import config from '../utils/config'
-
-type Payload = {
-  id: string
-  email: string
-}
 
 const eventRouter = Router()
 
-const checkAuth = async (req: Request) => {
+const authenticateUser = async (req: Request) => {
+  type Payload = {
+    id: string
+    email: string
+  }
+
   const authHeader = req.get('authorization')
   const token = authHeader ? authHeader.substring(7) : ''
   const decodedPayload = jwt.verify(token, config.get('secret')) as Payload
@@ -27,6 +27,16 @@ const checkAuth = async (req: Request) => {
   return user
 }
 
+const checkEventOwnership = (user: UserProps, id: string) => {
+  if (!(user.ownEvents && user.ownEvents.toString().includes(id))) {
+    const err = new Error(
+      `User has no rights to modify event or event with given id does not exist`
+    )
+    err.name = 'AuthenticationError'
+    throw err
+  }
+}
+
 eventRouter.get('/', async (_, res) => {
   const events = await Event.find()
   res.status(200).json(events)
@@ -36,7 +46,7 @@ eventRouter.post('/', async (req, res, next) => {
   const { title, date, description, category } = req.body
 
   try {
-    const user = await checkAuth(req)
+    const user = await authenticateUser(req)
 
     const event = new Event({
       title,
@@ -58,19 +68,13 @@ eventRouter.delete('/:id', async (req, res, next) => {
   const id = req.params.id
 
   try {
-    const user = await checkAuth(req)
+    const user = await authenticateUser(req)
 
-    if (!(user.ownEvents && user.ownEvents.toString().includes(id))) {
-      const err = new Error(
-        `User has no rights to modify event or event with given id does not exist`
-      )
-      err.name = 'AuthenticationError'
-      throw err
-    }
+    checkEventOwnership(user, id)
 
     await Event.findByIdAndDelete(id)
 
-    user.ownEvents = user.ownEvents.filter(
+    user.ownEvents = user.ownEvents?.filter(
       (eventId) => eventId.toString() !== id
     )
     await user.save()
@@ -93,23 +97,19 @@ eventRouter.put('/:id', async (req, res, next) => {
   }
 
   try {
-    const user = await checkAuth(req)
+    const user = await authenticateUser(req)
 
-    if (!(user.ownEvents && user.ownEvents.toString().includes(id))) {
-      const err = new Error(
-        `User has no rights to modify event or event with given id does not exist`
-      )
-      err.name = 'AuthenticationError'
-      throw err
-    }
+    checkEventOwnership(user, id)
 
     const result = await Event.findByIdAndUpdate(id, updatedEvent, {
       new: true,
       runValidators: true,
     })
+
     if (!result) {
       throw new Error('Document not found')
     }
+
     res.status(200).json(result)
   } catch (error) {
     next(error)
