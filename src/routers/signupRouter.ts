@@ -42,6 +42,7 @@ signupRouter.post('/', async (req, res, next) => {
     res.status(201).json({
       token,
       email: savedUser.email,
+      id: savedUser.id,
     })
   } catch (e) {
     next(e)

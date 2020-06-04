@@ -35,6 +35,7 @@ loginRouter.post('/', async (req, res, next) => {
 
     res.status(200).json({
       id: user._id,
+      email: user.email,
       token,
     })
   } catch (error) {
