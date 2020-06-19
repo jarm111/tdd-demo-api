@@ -18,6 +18,14 @@ export const eventSchema = createSchema({
   category: Type.string({ required: true, enum: categories }),
 })
 
+eventSchema.set('toJSON', {
+  transform: (_, ret) => {
+    ret.id = ret._id
+    delete ret._id
+    delete ret.__v
+  },
+})
+
 const Event = typedModel('Event', eventSchema)
 
 export default Event
