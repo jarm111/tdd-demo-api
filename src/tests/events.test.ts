@@ -36,15 +36,14 @@ afterAll(async () => {
 })
 
 beforeEach(async () => {
-  await Event.deleteMany({})
   await User.deleteMany({})
-  await Event.insertMany(events)
+  await Event.deleteMany({})
   await User.insertMany(await hashPasswords(users))
-  const eventsInDb = await getEventsInDb()
+
   const [user] = await getUsersInDb()
-  const eventIds = eventsInDb.map((event) => event.id)
-  user.ownEvents = user.ownEvents?.concat(eventIds)
-  await user.save()
+  const eventsWithUser = events.map((event) => ({ ...event, user: user.id }))
+
+  await Event.insertMany(eventsWithUser)
 })
 
 test('get events', async () => {
@@ -65,13 +64,12 @@ test('create event', async () => {
     .expect(201)
     .expect('Content-Type', /application\/json/)
 
-  const [userInDbAfter] = await getUsersInDb()
   const eventsInDbAfter = await getEventsInDb()
   const titles = eventsInDbAfter.map((event) => event.title)
 
   expect(eventsInDbAfter.length).toBe(events.length + 1)
   expect(titles).toContain(newEvent.title)
-  expect(userInDbAfter.ownEvents?.toString()).toContain(res.body.id)
+  expect(res.body.user).toEqual(userInDb.id)
 })
 
 test('create event validation', async () => {
@@ -121,11 +119,9 @@ test('delete event', async () => {
 
   const eventsInDbAfter = await getEventsInDb()
   const titles = eventsInDbAfter.map((event) => event.title)
-  const [userInDbAfter] = await getUsersInDb()
 
   expect(eventsInDbAfter.length).toBe(events.length - 1)
   expect(titles).not.toContain(eventToDelete.title)
-  expect(userInDbAfter.ownEvents?.toString()).not.toContain(eventToDelete.id)
 })
 
 test('unauthorized delete event', async () => {

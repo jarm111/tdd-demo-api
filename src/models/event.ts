@@ -1,4 +1,5 @@
 import { createSchema, Type, typedModel } from 'ts-mongoose'
+import { userSchema } from './user'
 
 const categories = [
   'music',
@@ -16,6 +17,7 @@ export const eventSchema = createSchema({
   date: Type.date({ required: true }),
   description: Type.string({ required: true }),
   category: Type.string({ required: true, enum: categories }),
+  user: Type.ref(Type.objectId()).to('User', userSchema),
 })
 
 eventSchema.set('toJSON', {
