@@ -71,7 +71,7 @@ test('create event', async () => {
 
   expect(eventsInDbAfter.length).toBe(events.length + 1)
   expect(titles).toContain(newEvent.title)
-  expect(userInDbAfter.ownEvents?.toString()).toContain(res.body._id)
+  expect(userInDbAfter.ownEvents?.toString()).toContain(res.body.id)
 })
 
 test('create event validation', async () => {
