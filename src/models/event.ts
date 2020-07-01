@@ -20,9 +20,12 @@ export const eventSchema = createSchema({
   user: Type.ref(Type.objectId()).to('User', userSchema),
 })
 
+const formatDate = (date: Date) => date.toISOString().slice(0, 10)
+
 eventSchema.set('toJSON', {
   transform: (_, ret) => {
     ret.id = ret._id
+    ret.date = formatDate(ret.date)
     delete ret._id
     delete ret.__v
   },
