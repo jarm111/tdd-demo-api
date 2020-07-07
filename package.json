@@ -1,7 +1,7 @@
 {
   "name": "tdd-demo-api",
-  "version": "0.0.1",
-  "description": "tdd-demo-api",
+  "version": "0.1.0",
+  "description": "Events Board demo RESTful API developed test-drivenly for my thesis",
   "main": "src/index.ts",
   "scripts": {
     "start": "cross-env NODE_ENV=production ts-node --transpile-only src/index.ts ",
@@ -10,8 +10,11 @@
     "watch": "cross-env NODE_ENV=development ts-node-dev src/index.ts",
     "lint": "eslint . --ext .ts"
   },
-  "author": "Jarmo Syvälahti",
-  "license": "ISC",
+  "author": {
+    "name": "Jarmo Syvälahti",
+    "url": "https://github.com/jarm111"
+  },
+  "license": "MIT",
   "devDependencies": {
     "@types/bcrypt": "^3.0.0",
     "@types/convict": "^5.2.1",
